@@ -3,9 +3,9 @@ import { useState } from 'react';
 import Tile from './Tile';
 
 export default function ProjectGrid({ projects }) {
-  const cats = ['All', ...new Set(projects.map((p) => p.category).filter(Boolean))];
+  const cats = ['All', ...new Set(projects.flatMap((p) => p.categories))];
   const [cat, setCat] = useState('All');
-  const list = projects.filter((p) => cat === 'All' || p.category === cat);
+  const list = projects.filter((p) => cat === 'All' || p.categories.includes(cat));
 
   return (
     <>

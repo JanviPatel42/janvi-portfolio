@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Gallery from '../../../components/Gallery';
-import { projects } from '../../../data/projects';
+import { projects, imagesOf, coverOf } from '../../../data/projects';
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -11,10 +11,11 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const p = projects.find((x) => x.slug === slug);
   if (!p) return {};
+  const cover = coverOf(p);
   return {
     title: p.title,
     description: p.summary,
-    openGraph: { title: p.title, description: p.summary, images: p.cover ? [p.cover] : undefined },
+    openGraph: { title: p.title, description: p.summary, images: cover ? [cover] : undefined },
   };
 }
 
@@ -26,8 +27,18 @@ export default async function ProjectPage({ params }) {
   const p = projects[i];
   const prev = projects[i - 1];
   const next = projects[i + 1];
-  const meta = [['Category', p.category], ['Year', p.year], ['Role', p.role], ['Duration', p.duration], ['Tools', (p.tools || []).join(', ')]].filter(([, v]) => v);
-  const story = [['Overview', p.overview], ['Challenge', p.challenge], ['Solution', p.solution], ['Outcome', p.outcome]].filter(([, v]) => v);
+  const cover = coverOf(p);
+
+  const meta = [
+    ['Category', p.categories.join(', ')],
+    ['Audience', p.audience],
+    ['Tools', (p.tools || []).join(', ')],
+  ].filter(([, v]) => v);
+
+  const buttons = [
+    ...(p.figma ? [{ label: 'View in Figma', url: p.figma }] : []),
+    ...(p.live || []).map((l) => ({ label: l.label, url: l.url })),
+  ];
 
   return (
     <main>
@@ -36,6 +47,15 @@ export default async function ProjectPage({ params }) {
           <Link href="/projects" className="back">← All projects</Link>
           <h1>{p.title}</h1>
           <p className="intro">{p.summary}</p>
+          {buttons.length > 0 && (
+            <div className="proj-links">
+              {buttons.map((b, k) => (
+                <a key={b.label} className={'btn' + (k ? ' ghost' : '')} href={b.url} target="_blank" rel="noopener noreferrer">
+                  <span>{b.label} ↗</span>
+                </a>
+              ))}
+            </div>
+          )}
         </header>
 
         <dl className="meta">
@@ -44,19 +64,25 @@ export default async function ProjectPage({ params }) {
           ))}
         </dl>
 
-        <div className={'cover' + (p.cover ? '' : ' ph')} style={{ background: p.color || '#55F2CF' }}>
-          {p.cover && <img src={p.cover} alt={`${p.title} cover`} />}
+        <div className={'cover' + (cover ? '' : ' ph')} style={{ background: p.color || '#55F2CF' }}>
+          {cover && <img src={cover} alt={`${p.title} cover`} />}
         </div>
 
         <div className="story">
-          {story.map(([k, v]) => (
-            <div className="row" key={k}><h2>{k}</h2><p>{v}</p></div>
-          ))}
+          <div className="row"><h2>Overview</h2><p>{p.overview}</p></div>
+          {p.features?.length > 0 && (
+            <div className="row">
+              <h2>Key features</h2>
+              <ul className="features">
+                {p.features.map((f) => <li key={f}>{f}</li>)}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="gal">
           <h2>Screens</h2>
-          <Gallery images={p.images || []} color={p.color} title={p.title} />
+          <Gallery images={imagesOf(p)} color={p.color} title={p.title} />
         </div>
 
         <nav className="pn">
