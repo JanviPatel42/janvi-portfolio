@@ -1,10 +1,11 @@
 import './globals.css';
-import { DM_Sans } from 'next/font/google';
+import { Lora, Nunito } from 'next/font/google';
 import Nav from '../components/Nav';
 import Footer from '../components/Footer';
 import Effects from '../components/Effects';
 
-const dm = DM_Sans({ subsets: ['latin'], variable: '--font-dm', display: 'swap' });
+const lora = Lora({ subsets: ['latin'], variable: '--font-lora', style: ['normal', 'italic'], display: 'swap' });
+const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', display: 'swap' });
 
 // Used to build absolute URLs for social-share images.
 // On Vercel this picks up the production domain automatically.
@@ -26,7 +27,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={dm.variable} data-scroll-behavior="smooth">
+    <html lang="en" className={`${nunito.variable} ${lora.variable}`} data-scroll-behavior="smooth">
       <body suppressHydrationWarning>
         <div className="progress" id="progress" />
         <div className="cursor" id="cursor" aria-hidden="true" />
